@@ -2,7 +2,7 @@
 
 Akashyk is a web application designed to act as a centralized, persistent long-term memory for all your AI interactions. The goal is to eliminate the need for manual copy-pasting of past conversations and documents by providing a single source of truth that your AI models can access.
 
-The name "Akashyk" is inspired by the Akashic records, a concept in mysticism that describes a universal library of all human knowledge and experience.
+I was tired of trying to switch between and navigate convos, and was shocked the AIs didn't generally remember previous convos (or could access them).
 
 ## ✨ Features
 
