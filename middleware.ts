@@ -1,47 +1,29 @@
 // middleware.ts
-import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs";
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
+import { createServerClient } from "@supabase/ssr";
 
-import type { NextRequest } from "next/server";
+export async function middleware(request: NextRequest) {
+  const response = NextResponse.next();
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next();
-  const supabase = createMiddlewareClient({ req, res });
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies
+            .getAll()
+            .map(({ name, value }) => ({ name, value }));
+        },
+        setAll(cookies) {
+          for (const { name, value, options } of cookies) {
+            response.cookies.set(name, value, options);
+          }
+        },
+      },
+    }
+  );
 
-  // Check if we have a session
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  // If the user is not logged in and is trying to access a protected route
-  if (!session && req.nextUrl.pathname !== "/login") {
-    const url = req.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
-  }
-
-  // If the user is logged in and tries to access the login page, redirect them to the home page
-  if (session && req.nextUrl.pathname === "/login") {
-    const url = req.nextUrl.clone();
-    url.pathname = "/";
-    return NextResponse.redirect(url);
-  }
-
-  return res;
+  await supabase.auth.getSession();
+  return response;
 }
-
-// This config tells the middleware to run on all paths except for static files and the API route.
-export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - api (our API routes, which will be handled separately)
-     * - login (our login page)
-     * - any files in the root that aren't a folder
-     */
-    "/((?!_next/static|_next/image|favicon.ico|api|login).*)",
-  ],
-};

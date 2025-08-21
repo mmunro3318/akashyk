@@ -3,7 +3,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient"; // Our Supabase client from Step 1
+import { supabase } from "../../../dumpster/lib/supabaseClient"; // Our Supabase client from Step 1
+import { createServerClient } from "@supabase/ssr"; // or your SSR helper
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -31,6 +32,18 @@ export default function LoginPage() {
       if (view === "sign-up") {
         setMessage("Success! Check your email for a confirmation link.");
       } else {
+        // Sync session to cookie for SSR
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (session) {
+          // Set cookie using SSR helper (on client, you may need to call an API route)
+          await fetch("/api/auth/set-cookie", {
+            method: "POST",
+            body: JSON.stringify({ session }),
+            headers: { "Content-Type": "application/json" },
+          });
+        }
         router.push("/"); // Redirect to the home page after successful login
       }
     }
