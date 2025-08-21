@@ -1,6 +1,45 @@
 // src/app/dashboard/page.tsx
+"use server";
+
 import { createClient } from "@/utils/supabase/server";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+
+export async function saveMemory(formData: FormData) {
+  const supabase = await createClient();
+
+  // Get the user's session from Supabase
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Redirect if the user is not logged in
+  if (!user) {
+    redirect("/login");
+  }
+
+  // Get the data from the form
+  const title = formData.get("title") as string;
+  const content = formData.get("content") as string;
+
+  // Insert the data into our memories table
+  const { error } = await supabase.from("memories").insert([
+    {
+      user_id: user.id,
+      title,
+      content,
+      type: "text",
+    },
+  ]);
+
+  if (error) {
+    console.error("Error saving memory:", error);
+    // You could also redirect to an error page here
+  }
+
+  // Revalidate the dashboard page to show the new memory
+  revalidatePath("/dashboard");
+}
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -26,7 +65,7 @@ export default async function DashboardPage() {
           the form below to add a new memory.
         </p>
 
-        <form className="space-y-6">
+        <form className="space-y-6" action={saveMemory}>
           <h2 className="text-xl font-semibold text-white text-center">
             Add a New Memory
           </h2>
