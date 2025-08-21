@@ -18,9 +18,20 @@ export async function summarizeMemory(formData: FormData) {
   const supabase = await createClient();
 
   const prompt = `
-  You are a professional assistant that provides high-level summaries and key information from text. Your output should be concise and helpful. Never include your own thoughts or meta-commentary. Please provide a one-paragraph summary of the following text, followed by 3-5 bullet points of the most important takeaways and any action items.
+  You are a professional assistant that provides high-level summaries and key information from text. Your output should be concise and helpful. Never include your own thoughts or meta-commentary or extraneous information. Please provide a one-paragraph summary of the following text, followed by 3-5 bullet points of the most important takeaways.
 
   Text to summarize: ${content}
+
+  Remember -- your output should be of the format:
+
+  Summary:
+  [One-paragraph summary here]
+
+  Key Takeaways:
+  - [First key takeaway]
+  - [Second key takeaway]
+  - [Third key takeaway]
+  [Additional bullet points if any]
   `;
 
   try {
