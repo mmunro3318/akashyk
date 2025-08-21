@@ -5,6 +5,47 @@ import Link from "next/link";
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import axios from "axios";
+
+export async function summarizeMemory(formData: FormData) {
+  "use server";
+
+  // Get the data from the form
+  const memoryId = formData.get("id") as string;
+  const content = formData.get("content") as string;
+
+  const supabase = await createClient();
+
+  const prompt = `
+  You are a professional assistant that provides high-level summaries and key information from text. Your output should be concise and helpful. Never include your own thoughts or meta-commentary. Please provide a one-paragraph summary of the following text, followed by 3-5 bullet points of the most important takeaways and any action items.
+
+  Text to summarize: ${content}
+  `;
+
+  try {
+    const response = await axios.post("http://localhost:11434/api/generate", {
+      model: process.env.HOSTED_LLM_MODEL || "llama3.2:1b",
+      prompt: prompt,
+      stream: false,
+    });
+
+    const summary = response.data.response;
+
+    // Save the summary back to the database
+    const { error } = await supabase
+      .from("memories")
+      .update({ summary })
+      .eq("id", memoryId);
+
+    if (error) {
+      console.error("Error updating summary:", error);
+    }
+
+    revalidatePath("/dashboard/memories");
+  } catch (error) {
+    console.error("Error generating summary:", error);
+  }
+}
 
 export async function saveMemory(formData: FormData) {
   const supabase = await createClient();
