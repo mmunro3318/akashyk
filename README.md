@@ -2,7 +2,7 @@
 
 Akashyk is a web application designed to act as a centralized, persistent long-term memory for all your AI interactions. The goal is to eliminate the need for manual copy-pasting of past conversations and documents by providing a single source of truth that your AI models can access.
 
-I was tired of trying to switch between and navigate convos, and was shocked the AIs didn't generally remember previous convos (or could access them).
+I was tired of trying to switch between and navigate convos, and was shocked the AIs didn't generally remember previous convos (or could access them). This is predominently a helpful tool and project to learn Next.js + Supabase, coming from MERN.
 
 ## ✨ Features
 
@@ -13,6 +13,9 @@ This project is being developed in three main epochs.
 - **User Authentication:** Secure sign-up and sign-in.
 - **Manual Ingestion:** Add text-based memories, documents, and images through a user interface.
 - **Secure Storage:** Personal data is securely stored and can only be accessed by the authenticated user.
+- **Manual Summarization:** AI summarizes memory and stores on DB at user request (using local AI via Ollama).
+
+_!_ I made it public for now -- will secure reads in later epoch
 
 ### Epoch 2: AI-Powered Organization
 
@@ -47,6 +50,7 @@ Follow these steps to set up and run the project locally.
     ```
     NEXT_PUBLIC_SUPABASE_URL=YOUR_SUPABASE_URL_HERE
     NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY_HERE
+    HOSTED_LLM_MODEL=llama3.2:1b || whatever
     ```
 
 ### 2. Set up the Database Schema
@@ -93,21 +97,22 @@ Under the Authentication tab, under URL Configuration, you will `Add a URL` to t
 
 `http://localhost:3000/auth/callback`
 
+### 4. Finish Supabase Setup -- Using SSR
+
+_!_ The auth-helpers are deprecated for the new SSR, and the AI's struggle to implement the new formats. I've included an SSR-Supabase-Setup-Tutorial (mostly written for the next AI to read).
+
+### 4. Setup Local AI Model
+
+Install Ollama, then pull whatever model you want to use (I'm using for now, llama3.2:1b)
+
+```bash
+ollama pull llama3.2:1b
+ollama serve
+```
+
 ### 4. Run the Application
 
 ```bash
 npm install
 npm run dev
-
-
-
-
-
-
-
-
-
-
-
-
 ```
