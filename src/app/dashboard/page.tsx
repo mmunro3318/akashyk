@@ -94,7 +94,13 @@ export default async function DashboardPage() {
           Welcome back, <span className="font-semibold">{user.email}</span>! Use
           the form below to add a new memory.
         </p>
-
+        <div className="flex justify-center mt-4 mb-8">
+          <Link href="/dashboard/memories">
+            <span className="inline-block py-2 px-6 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow transition-colors duration-150 ease-in-out">
+              View All Your Memories
+            </span>
+          </Link>
+        </div>
         <form className="space-y-6" action={saveMemory}>
           <h2 className="text-xl font-semibold text-white text-center">
             Add a New Memory
