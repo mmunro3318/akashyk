@@ -23,30 +23,35 @@ export default async function MemoriesPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center p-8">
-      <div className="w-full max-w-2xl">
-        <h1 className="text-3xl font-bold mb-6 text-gray-800">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 p-8">
+      <div className="w-full max-w-2xl rounded-xl bg-gray-800 shadow-lg p-8">
+        <h1 className="text-3xl font-bold mb-8 text-white text-center">
           All Your Memories
         </h1>
         {memories && memories.length > 0 ? (
-          <ul className="space-y-4">
+          <ul className="space-y-6">
             {memories.map((memory) => (
               <li
                 key={memory.id}
-                className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+                className="bg-gray-700 p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300"
               >
-                <h2 className="text-xl font-semibold text-gray-700 mb-2">
+                <h2 className="text-xl font-semibold text-blue-400 mb-2">
                   {memory.title}
                 </h2>
-                <p className="text-gray-600 mb-4">{memory.content}</p>
-                <span className="text-sm text-gray-500">
-                  Added on: {new Date(memory.created_at).toLocaleDateString()}
+                <p className="text-gray-200 mb-4">{memory.content}</p>
+                <span className="text-sm text-gray-400">
+                  Added on:{" "}
+                  {new Date(memory.created_at).toLocaleDateString(undefined, {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
                 </span>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-center text-gray-500">
+          <p className="text-center text-gray-400">
             You haven't added any memories yet.
           </p>
         )}
