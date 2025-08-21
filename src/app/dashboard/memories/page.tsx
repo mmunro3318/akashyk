@@ -40,13 +40,13 @@ export default async function MemoriesPage() {
                   <h2 className="text-xl font-semibold text-blue-400">
                     {memory.title}
                   </h2>
-                  {/* The Summarize Form */}
-                  <form
-                    action={summarizeMemory}
-                    className="flex items-center"
-                  >
+                  <form action={summarizeMemory} className="flex items-center">
                     <input type="hidden" name="id" value={memory.id} />
-                    <input type="hidden" name="content" value={memory.content} />
+                    <input
+                      type="hidden"
+                      name="content"
+                      value={memory.content}
+                    />
                     <button
                       type="submit"
                       className="ml-4 px-4 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold shadow transition duration-150 ease-in-out"
@@ -81,6 +81,18 @@ export default async function MemoriesPage() {
                   </div>
                 )}
                 <p className="text-gray-200 mb-4">{memory.content}</p>
+                {memory.file_url && (
+                  <div className="mt-4">
+                    <a
+                      href={memory.file_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 hover:underline"
+                    >
+                      View Attachment
+                    </a>
+                  </div>
+                )}
                 <span className="text-sm text-gray-400">
                   Added on:{" "}
                   {new Date(memory.created_at).toLocaleDateString(undefined, {
