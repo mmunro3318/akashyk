@@ -6,6 +6,7 @@ import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
 
 export async function summarizeMemory(formData: FormData) {
   "use server";
@@ -60,9 +61,39 @@ export async function saveMemory(formData: FormData) {
     redirect("/login");
   }
 
-  // Get the data from the form
   const title = formData.get("title") as string;
   const content = formData.get("content") as string;
+  const file = formData.get("file") as File;
+
+  let fileUrl = null;
+  let fileType = "text";
+
+  // Check if a file was uploaded
+  if (file && file.size > 0) {
+    // Generate a unique file name
+    const uniqueFileName = `${user.id}/${uuidv4()}-${file.name}`;
+    fileType = file.type.startsWith("image/") ? "image" : "document";
+
+    // Upload the file to Supabase Storage
+    const { data: fileData, error: fileError } = await supabase.storage
+      .from("memories")
+      .upload(uniqueFileName, file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (fileError) {
+      console.error("Error uploading file:", fileError);
+      return;
+    }
+
+    // Get the public URL for the uploaded file
+    const { data: publicUrlData } = supabase.storage
+      .from("memories")
+      .getPublicUrl(uniqueFileName);
+
+    fileUrl = publicUrlData.publicUrl;
+  }
 
   // Insert the data into our memories table
   const { error } = await supabase.from("memories").insert([
@@ -70,13 +101,13 @@ export async function saveMemory(formData: FormData) {
       user_id: user.id,
       title,
       content,
-      type: "text",
+      file_url: fileUrl,
+      type: fileType,
     },
   ]);
 
   if (error) {
     console.error("Error saving memory:", error);
-    // You could also redirect to an error page here
   }
 
   // Revalidate the dashboard page to show the new memory
