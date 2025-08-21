@@ -1,6 +1,7 @@
 // src/app/dashboard/page.tsx
 "use server";
 
+import Link from "next/link";
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -54,12 +55,41 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
+  // Sign out handler using the /auth/signout route
+  const handleSignOut = () => {
+    window.location.href = "/auth/signout";
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 p-8">
       <div className="w-full max-w-2xl rounded-xl bg-gray-800 shadow-lg p-8">
-        <h1 className="text-3xl font-bold mb-6 text-white text-center">
-          Your Memory Repository
-        </h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-white text-center flex-1">
+            Your Memory Repository
+          </h1>
+          <Link
+            href="/auth/signout"
+            className="ml-4 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-semibold shadow transition duration-150 ease-in-out"
+          >
+            <span className="inline-block align-middle mr-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 inline-block"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h4a2 2 0 012 2v1"
+                />
+              </svg>
+            </span>
+            Sign Out
+          </Link>
+        </div>
         <p className="text-gray-300 mb-8 text-center">
           Welcome back, <span className="font-semibold">{user.email}</span>! Use
           the form below to add a new memory.
