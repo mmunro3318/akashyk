@@ -110,8 +110,9 @@ export async function saveMemory(formData: FormData) {
     console.error("Error saving memory:", error);
   }
 
-  // Revalidate the dashboard page to show the new memory
+  // Revalidate the dashboard page to show the new memory and redirect
   revalidatePath("/dashboard");
+  redirect("/dashboard");
 }
 
 export default async function DashboardPage() {
