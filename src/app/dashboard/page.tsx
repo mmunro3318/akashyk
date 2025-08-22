@@ -9,8 +9,6 @@ import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 
 export async function summarizeMemory(formData: FormData) {
-  "use server";
-
   // Get the data from the form
   const memoryId = formData.get("id") as string;
   const content = formData.get("content") as string;
@@ -20,7 +18,11 @@ export async function summarizeMemory(formData: FormData) {
   const prompt = `
   You are a professional assistant that provides high-level summaries and key information from text. Your output should be concise and helpful. Never include your own thoughts or meta-commentary or extraneous information. Please provide a one-paragraph summary of the following text, followed by 3-5 bullet points of the most important takeaways.
 
-  Text to summarize: ${content}
+  Text to summarize:
+  
+  '''text
+  ${content}
+  '''
 
   Remember -- your output should be of the format:
 
@@ -35,27 +37,63 @@ export async function summarizeMemory(formData: FormData) {
   `;
 
   try {
-    const response = await axios.post("http://localhost:11434/api/generate", {
-      model: process.env.HOSTED_LLM_MODEL || "llama3.2:1b",
-      prompt: prompt,
-      stream: false,
-    });
+    // -- 1. Generate the summary --
+    const summaryResponse = await axios.post(
+      "http://localhost:11434/api/generate",
+      {
+        model: process.env.HOSTED_LLM_MODEL || "llama3.2:1b",
+        prompt: prompt,
+        stream: false,
+      }
+    );
 
-    const summary = response.data.response;
+    const summary = summaryResponse.data.response;
 
-    // Save the summary back to the database
+    // -- 2. Store the summary back to the database
     const { error } = await supabase
       .from("memories")
       .update({ summary })
       .eq("id", memoryId);
 
+    // -- 3. Generate and store the embedding
+    await generateEmbedding(formData);
+
     if (error) {
-      console.error("Error updating summary:", error);
+      console.error("Error updating memory with summary:", error);
     }
 
     revalidatePath("/dashboard/memories");
   } catch (error) {
-    console.error("Error generating summary:", error);
+    console.error("Error generating summary or embedding:", error);
+  }
+}
+
+export async function generateEmbedding(formData: FormData) {
+  const memoryId = formData.get("id") as string;
+  const content = formData.get("content") as string;
+  const supabase = await createClient();
+
+  try {
+    // Generate the vector embedding
+    const embeddingResponse = await axios.post(
+      "http://localhost:11434/api/embeddings",
+      {
+        model: process.env.HOSTED_EMBEDDING_MODEL || "nomic-embed-text",
+        input: content,
+      }
+    );
+
+    const embedding = embeddingResponse.data.embedding;
+    const { error } = await supabase
+      .from("memories")
+      .update({ embedding })
+      .eq("id", memoryId);
+    if (error) {
+      console.error("Error updating memory with embedding:", error);
+    }
+  } catch (error) {
+    console.error("Error generating embedding:", error);
+    return null;
   }
 }
 
